@@ -7,7 +7,9 @@ from pathlib import Path
 
 @dataclass
 class bryc:
-    """"""
+    """
+    Interpret-time functions.
+    """
 
     @staticmethod
     def emit(x):
@@ -31,7 +33,7 @@ class Code(Range):
 
 
 def bryc_find_invocation(text: str, start: int) -> Invocation | None:
-    comment_start = "/* bryc: start */"
+    comment_start = "/* # bryc: start"
     comment_end = "/* bryc: end */"
     i_start = text.find(comment_start, start)
     if i_start == -1:
@@ -47,16 +49,15 @@ def bryc_find_invocation(text: str, start: int) -> Invocation | None:
 
 
 def bryc_find_invocation_code(text: str, invocation: Invocation) -> Code | None:
-    i_start = text.find("/*", invocation.start, invocation.end)
+    i_start = text.find("\n", invocation.start, invocation.end)
     if i_start == -1:
         return None
-
-    i_start += 2
+    i_start += 1
     i_end = text.find("*/", i_start, invocation.end)
     if i_end == -1:
         return None
 
-    code = text[i_start:i_end].strip()
+    code = text[i_start : i_end].strip()
 
     return Code(i_start, i_end + 2, code)
 
@@ -64,18 +65,20 @@ def bryc_find_invocation_code(text: str, invocation: Invocation) -> Code | None:
 emit = None
 
 
-def process(file: Path | str):
-    print(f"bryc: {file}")
+def bryc_process(file: Path | str):
     global emit
-    file = Path(file)
-    c_code = file.read_text()
 
     output = ""
+    defs = {"bryc": bryc}
 
     def emit(_) -> None:
         nonlocal output
         output += str(_)
         output += "\n"
+
+    print(f"bryc: {file}")
+    file = Path(file)
+    c_code = file.read_text()
 
     i = 0
     while True:
@@ -91,12 +94,16 @@ def process(file: Path | str):
         output = "\n"
 
         try:
+            # NOTE(bozho2):
+            #   This ensures the line numbers match if an exception is thrown
+            #   and a traceback is displayed.
+            extra_lines = "\n" * c_code[: code.start + 2].count("\n")
             py_code = compile(
-                ("\n" * c_code[: code.start + 2].count("\n")) + code.code,
+                extra_lines + code.code,
                 str(file),
                 "exec",
             )
-            exec(py_code)
+            exec(py_code, defs, dict(defs))
         except Exception:
             output = "\n"
             output += "".join(
@@ -109,7 +116,9 @@ def process(file: Path | str):
 
     file.write_text(c_code)
 
+    emit = None
+
 
 for file in sys.argv[1:]:
     if file != "_":
-        process(file)
+        bryc_process(file)
