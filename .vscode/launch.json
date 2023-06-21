@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "X",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/x.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
+    ],
+    "compounds": []
+}
