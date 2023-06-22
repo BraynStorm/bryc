@@ -11,7 +11,9 @@ block and the python part of the code is inside the `# bryc: start` comment.
 The code between `/* bryc: start ... */` and `/* bryc: end */` will be populated
 by all `bryc.emit(...)` calls, each on a separate line .
 
+
 ## Usage
+
 ```c
 // file.c
 
@@ -27,6 +29,7 @@ Building is as easy as
 python3 bryc.py file.c
 gcc file.c
 ```
+
 
 ## Example
 
@@ -69,9 +72,11 @@ int main()
 }
 ```
 
+
 ## Pre-requisites
 
 `bryc` uses only standard Python 3.11 code, without any external dependencies.
+
 
 ## Security
 
@@ -115,6 +120,7 @@ bryc(my_library)
 
 ```
 
+
 ## Open questions
 
 `bryc` is in it's infancy. There are open questions about using it effectively.
@@ -126,6 +132,4 @@ bryc(my_library)
   - For example, your codegen needs to use a lot of matrix math and you want to use NumPY.
 - Poor IDE support
   - `VSCode` + `clangd` don't support language injections (AFAIK) so the python code in the comment is treated as just a comment - no highlighting.
-
-
 
