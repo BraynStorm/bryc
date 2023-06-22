@@ -1,4 +1,8 @@
-set(BRYC ${CMAKE_SOURCE_DIR}/bryc.py)
+option(BRYC "Location of bryc.py" "${CMAKE_SOURCE_DIR}/bryc.py")
+
+if (NOT EXISTS ${BRYC})
+    file(DOWNLOAD curl https://raw.githubusercontent.com/BraynStorm/bryc/master/bryc.py -o "${BRYC}")
+endif()
 
 function(bryc target)
     get_target_property(SOURCES ${target} SOURCES)

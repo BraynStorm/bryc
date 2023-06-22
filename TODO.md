@@ -1,0 +1,1 @@
+- [ ] Allow bryc to access useful CMAKE variables.

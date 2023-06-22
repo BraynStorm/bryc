@@ -1,6 +1,6 @@
 static int a;
 
-/* # bryc: start
+/* bryc: start
 from pathlib import Path
 
 csv = (Path("t0.csv")).read_text(encoding='utf-8')
@@ -21,7 +21,7 @@ static int x [2][3] = {
 
 static int b;
 
-int main() {
+int main() { 
   int sum = 0;
   for (int i = 0; i < X_ROWS; ++i) {
     for (int j = 0; j < X_COLS; ++j) {
