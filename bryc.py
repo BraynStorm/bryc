@@ -1,28 +1,38 @@
 import sys
 import traceback
 import os
+import logging
 
 from dataclasses import dataclass
 from pathlib import Path
 
-
-import logging
-
-logging.basicConfig(level=os.environ.get("BRYC_LOGLEVEL", "INFO"), encoding="utf-8")
+logging.basicConfig(
+    level=os.environ.get("BRYC_LOGLEVEL", "INFO"),
+    encoding="utf-8",
+    # format="%(levelname)01s | %(message)s",
+    format="{levelname} | {message}",
+    style="{",
+)
 logger = logging.getLogger(__name__)
 
+logger.debug("bryc: invoked as:" + " ".join(sys.orig_argv))
+
 # NOTE(bozho2):
-#   Hack the import so
+#   Hack sys.modules so codegen libraries can do
 #       'from bryc import ...'
-#   is the same as
+#   and it is the same as
 #       'from __main__ import ...'
 #
-#   This is useful for implementing code-generation libraries and utilities.
-#   See tests/t1 for a simple example.
+#   See tests/t1* for a simple example of where it is useful.
 sys.modules[Path(__file__).stem] = sys.modules[__name__]
 
 
-logger.debug("bryc: invoked as:" + " ".join(sys.orig_argv))
+# NOTE(bozho2):
+#   Customization point.
+
+BRYC_BLOCK_START_LINE = "/* bryc: start"
+BRYC_CODE_END_LINE = "*/"
+bRYC_BLOCK_END_LINE = "/* bryc: end */"
 
 
 @dataclass
@@ -86,11 +96,11 @@ if __name__ == "__main__":
         logger.debug(f"bryc: {file}")
         file = Path(file)
         c_code = file.read_text()
+        original_c_code = c_code
 
         old_py_path = list(sys.path)
         sys.path.append(str(file.parent.absolute()))
 
-        defs = {}
         global bryc
 
         i = 0
@@ -110,7 +120,7 @@ if __name__ == "__main__":
             #   This is here to allow "implicitly imported" bryc.
             #   Basically, for simple scripts this saves 1 line:
             #   `from bryc import bryc`
-            defs["bryc"] = bryc
+            defs = {"bryc": bryc}
             try:
                 # NOTE(bozho2):
                 #   This ensures the line numbers match if an exception is thrown
@@ -135,11 +145,14 @@ if __name__ == "__main__":
             c_code = c_code[: code.end] + bryc.output + c_code[invocation.end :]
 
             sys.path = old_py_path
-            file.write_text(c_code)
+
+            if original_c_code != c_code:
+                # NOTE(bozho2):
+                #   Something was generated.
+                file.write_text(c_code)
 
     for file in sys.argv[1:]:
-        if file != "_":
-            bryc_process(file)
+        bryc_process(file)
 
     end = time_ns()
     took = end - start
