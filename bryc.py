@@ -32,7 +32,7 @@ sys.modules[Path(__file__).stem] = sys.modules[__name__]
 
 BRYC_BLOCK_START_LINE = "/* bryc: start"
 BRYC_CODE_END_LINE = "*/"
-bRYC_BLOCK_END_LINE = "/* bryc: end */"
+BRYC_BLOCK_END_LINE = "/* bryc: end */"
 
 
 @dataclass
@@ -65,8 +65,8 @@ if __name__ == "__main__":
         code: str
 
     def bryc_find_invocation(text: str, start: int) -> Invocation | None:
-        comment_start = "/* bryc: start"
-        comment_end = "/* bryc: end */"
+        comment_start = BRYC_BLOCK_START_LINE
+        comment_end = BRYC_BLOCK_END_LINE
         i_start = text.find(comment_start, start)
         if i_start == -1:
             return None
@@ -84,7 +84,7 @@ if __name__ == "__main__":
         if i_start == -1:
             return None
         i_start += 1
-        i_end = text.find("*/", i_start, invocation.end)
+        i_end = text.find(BRYC_CODE_END_LINE, i_start, invocation.end)
         if i_end == -1:
             return None
 
