@@ -95,7 +95,7 @@ if __name__ == "__main__":
     def bryc_process(file: Path | str):
         logger.debug(f"bryc: {file}")
         file = Path(file)
-        c_code = file.read_text()
+        c_code = file.read_text(encoding='utf-8')
         original_c_code = c_code
 
         old_py_path = list(sys.path)
