@@ -43,7 +43,11 @@ class bryc_:
         self.output += str(x) + "\n"
 
 
-bryc: bryc_ = None
+_bryc: bryc_ = None
+
+
+def bryc() -> bryc_:
+    return _bryc
 
 
 if __name__ == "__main__":
@@ -95,13 +99,13 @@ if __name__ == "__main__":
     def bryc_process(file: Path | str):
         logger.debug(f"bryc: {file}")
         file = Path(file)
-        c_code = file.read_text(encoding='utf-8')
+        c_code = file.read_text(encoding="utf-8")
         original_c_code = c_code
 
         old_py_path = list(sys.path)
         sys.path.append(str(file.parent.absolute()))
 
-        global bryc
+        global _bryc
 
         i = 0
         while True:
@@ -114,7 +118,7 @@ if __name__ == "__main__":
             if code is None:
                 continue
 
-            bryc = bryc_("\n")
+            _bryc = bryc_("\n")
 
             # NOTE(bozho2):
             #   This is here to allow "implicitly imported" bryc.
@@ -135,28 +139,28 @@ if __name__ == "__main__":
             except Exception:
                 # NOTE(bozho2):
                 #   Output the exception's text as `#error BRYC:` lines
-                bryc.output = "\n"
-                bryc.output += "".join(
+                _bryc.output = "\n"
+                _bryc.output += "".join(
                     map(
                         lambda ex: f"#error BRYC: {ex}\n",
                         traceback.format_exc().strip().split("\n"),
                     )
                 )
-            c_code = c_code[: code.end] + bryc.output + c_code[invocation.end :]
+            c_code = c_code[: code.end] + _bryc.output + c_code[invocation.end :]
 
             sys.path = old_py_path
 
-            if original_c_code != c_code:
-                # NOTE(bozho2):
-                #   Something was generated.
-                file.write_text(c_code)
+        if original_c_code != c_code:
+            # NOTE(bozho2):
+            #   Something was generated.
+            file.write_text(c_code)
 
     for file in sys.argv[1:]:
         bryc_process(file)
 
     end = time_ns()
     took = end - start
-    logger.info(f"bryc: took {took/1_000_000_000:#1.3f}s for {file}")
+    logger.info(f"bryc: took {took/1_000_000_000:#1.3f}s for {sys.argv[1:]}")
 
 
 __all__ = ["bryc"]

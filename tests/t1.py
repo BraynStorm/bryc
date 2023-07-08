@@ -36,4 +36,4 @@ def create_variable(
         maybe_array = "".join(map(lambda a: f"[{a}]", array))
     p += f"{type}{c} {name}{maybe_array}{maybe_value};"
 
-    bryc.emit(p)
+    bryc().emit(p)

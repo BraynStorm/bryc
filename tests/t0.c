@@ -7,9 +7,9 @@ csv = (Path("t0.csv")).read_text(encoding='utf-8')
 lines = csv.split('\n')
 cols = lines[0].count(',')+1
 fmt_csv = '\n'.join(map(lambda l: f"    {{{l}}},",lines))
-bryc.emit(f"static int x [{len(lines)}][{cols}] = {{\n{fmt_csv}\n}};")
-bryc.emit(f"#define X_ROWS {len(lines)}")
-bryc.emit(f"#define X_COLS {cols}")
+bryc().emit(f"static int x [{len(lines)}][{cols}] = {{\n{fmt_csv}\n}};")
+bryc().emit(f"#define X_ROWS {len(lines)}")
+bryc().emit(f"#define X_COLS {cols}")
 */
 static int x [2][3] = {
     {0, 1, -2},

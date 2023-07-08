@@ -9,9 +9,11 @@ if("${BRYC_VERSION}" STREQUAL "")
 endif()
 
 # NOTE:
-#   This makes bryc.py be auto-updated
-message("bryc.cmake: Downloading bryc.py (${BRYC_VERSION})")
-file(DOWNLOAD https://raw.githubusercontent.com/BraynStorm/bryc/${BRYC_VERSION}/bryc.py "${BRYC}")
+# This makes bryc.py be auto-updated
+if(NOT (${PROJECT_NAME} STREQUAL "bryc2"))
+    message("bryc.cmake: Downloading bryc.py (${BRYC_VERSION})")
+    file(DOWNLOAD https://raw.githubusercontent.com/BraynStorm/bryc/${BRYC_VERSION}/bryc.py "${BRYC}")
+endif()
 
 function(bryc target)
     get_target_property(SOURCES ${target} SOURCES)

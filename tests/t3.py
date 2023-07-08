@@ -46,8 +46,8 @@ def declare_generic_macros(vectors: list[Vector]) -> str:
 
 def declare_vectors(types: list[str]):
     vecs = {t: Vector(t) for t in types}
-    bryc.emit("#define VECTOR static inline")
+    bryc().emit("#define VECTOR static inline")
     for t, v in vecs.items():
-        bryc.emit(v.declaration())
-    bryc.emit(declare_generic_macros(list(vecs.values())))
-    bryc.emit("#undef VECTOR")
+        bryc().emit(v.declaration())
+    bryc().emit(declare_generic_macros(list(vecs.values())))
+    bryc().emit("#undef VECTOR")
