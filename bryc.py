@@ -42,6 +42,48 @@ class bryc_:
     def emit(self, x):
         self.output += str(x) + "\n"
 
+    def call(self, module_name: str, function: str, *args, **kwargs):
+        """
+        Equivalent of:
+        ```python
+            import {module_name}
+            value = {module_name}.{function}(*args, **kwargs)
+            if value:
+                bryc().emit(value)
+        ```
+
+        If you all your code is already in an external file
+        doing:
+        ```c
+        /* bryc: start
+        from module import *
+
+        my_function()
+        */
+        /* bryc: end */
+        ```
+        is laborious and annoying. Instead, use this:
+
+        ```c
+        /* bryc: start
+        bryc().run("module", "my_function")
+        */
+        /* bryc: end */
+        ```
+
+        """
+        from importlib import import_module
+
+        module = import_module(module_name)
+        function = getattr(module, function)
+        if callable(function):
+            value = function(*args, **kwargs)
+
+            if value:
+                self.emit(value)
+        else:
+            self.emit(function)
+
 
 _bryc: bryc_ = None
 
