@@ -3,19 +3,22 @@ import traceback
 import os
 import logging
 
+
+from typing import Optional, Union  # NOTE: Python <3.10 support
 from dataclasses import dataclass
 from pathlib import Path
 
 logging.basicConfig(
     level=os.environ.get("BRYC_LOGLEVEL", "INFO"),
-    encoding="utf-8",
     # format="%(levelname)01s | %(message)s",
     format="{levelname} | {message}",
     style="{",
 )
 logger = logging.getLogger(__name__)
 
-logger.debug("bryc: invoked as:" + " ".join(sys.orig_argv))
+
+argv = getattr(sys, "orig_argv", sys.argv)  # NOTE: Python <3.10 support.
+logger.debug("bryc: invoked as:" + " ".join(argv))
 
 # NOTE(bozho2):
 #   Hack sys.modules so codegen libraries can do
@@ -110,7 +113,7 @@ if __name__ == "__main__":
     class Code(Range):
         code: str
 
-    def bryc_find_invocation(text: str, start: int) -> Invocation | None:
+    def bryc_find_invocation(text: str, start: int) -> Optional[Invocation]:
         comment_start = BRYC_BLOCK_START_LINE
         comment_end = BRYC_BLOCK_END_LINE
         i_start = text.find(comment_start, start)
@@ -125,7 +128,7 @@ if __name__ == "__main__":
 
         return Invocation(i_start, i_end)
 
-    def bryc_find_invocation_code(text: str, invocation: Invocation) -> Code | None:
+    def bryc_find_invocation_code(text: str, invocation: Invocation) -> Optional[Code]:
         i_start = text.find("\n", invocation.start, invocation.end)
         if i_start == -1:
             return None
@@ -138,7 +141,7 @@ if __name__ == "__main__":
 
         return Code(i_start, i_end + 2, code)
 
-    def bryc_process(file: Path | str):
+    def bryc_process(file: Union[Path, str]):
         logger.debug(f"bryc: {file}")
         file = Path(file)
         c_code = file.read_text(encoding="utf-8")
