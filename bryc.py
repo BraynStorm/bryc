@@ -1,12 +1,11 @@
+import argparse
+import logging
+import os
 import sys
 import traceback
-import os
-import logging
-
-
-from typing import Optional, Union  # NOTE: Python <3.10 support
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional, Union  # NOTE: Python <3.10 support
 
 logging.basicConfig(
     level=os.environ.get("BRYC_LOGLEVEL", "INFO"),
@@ -16,9 +15,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
-argv = getattr(sys, "orig_argv", sys.argv)  # NOTE: Python <3.10 support.
-logger.debug("bryc: invoked as:" + " ".join(argv))
 
 # NOTE(bozho2):
 #   Hack sys.modules so codegen libraries can do
@@ -88,7 +84,7 @@ class bryc_:
             self.emit(function)
 
 
-_bryc: bryc_ = None
+_bryc: bryc_ = None  # type:ignore
 
 
 def bryc() -> bryc_:
@@ -99,6 +95,22 @@ if __name__ == "__main__":
     from time import time_ns
 
     start = time_ns()
+
+    parser = argparse.ArgumentParser("python bryc.py")
+    parser.add_argument("files", nargs="+")
+    parser.add_argument("--verbose", "-v", action="count", default=0)
+    args = parser.parse_args()
+    if args.verbose >= 3:
+        logger.setLevel("DEBUG")
+    if args.verbose >= 2:
+        logger.setLevel("INFO")
+    elif args.verbose >= 1:
+        logger.setLevel("WARNING")
+    elif args.verbose >= 0:
+        logger.setLevel("ERROR")
+
+    argv = getattr(sys, "orig_argv", sys.argv)  # NOTE: Python <3.10 support.
+    logger.debug("bryc: invoked as:" + " ".join(argv))
 
     @dataclass
     class Range:
@@ -200,12 +212,12 @@ if __name__ == "__main__":
             #   Something was generated.
             file.write_text(c_code)
 
-    for file in sys.argv[1:]:
+    for file in args.files:
         bryc_process(file)
 
     end = time_ns()
     took = end - start
-    logger.info(f"bryc: took {took/1_000_000_000:#1.3f}s for {sys.argv[1:]}")
+    logger.info(f"bryc: took {took/1_000_000_000:#1.3f}s for {args.files}")
 
 
 __all__ = ["bryc"]

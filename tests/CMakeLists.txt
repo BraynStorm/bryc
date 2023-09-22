@@ -3,7 +3,7 @@ enable_testing()
 
 function(bryc_test target ...)
     add_executable(${ARGV})
-    bryc(${target})
+    bryc(${target} VERBOSE)
     add_test(${target} ${target})
 endfunction()
 
