@@ -165,6 +165,11 @@ if __name__ == "__main__":
         global _bryc
 
         i = 0
+        # NOTE(bozho2):
+        #   This is here to allow "implicitly imported" bryc.
+        #   Basically, for simple scripts this saves 1 line:
+        #   `from bryc import bryc`
+        defs = {"bryc": bryc}
         while True:
             invocation = bryc_find_invocation(c_code, i)
             if invocation is None:
@@ -176,12 +181,6 @@ if __name__ == "__main__":
                 continue
 
             _bryc = bryc_("\n")
-
-            # NOTE(bozho2):
-            #   This is here to allow "implicitly imported" bryc.
-            #   Basically, for simple scripts this saves 1 line:
-            #   `from bryc import bryc`
-            defs = {"bryc": bryc}
             try:
                 # NOTE(bozho2):
                 #   This ensures the line numbers match if an exception is thrown
@@ -192,7 +191,7 @@ if __name__ == "__main__":
                     str(file),
                     "exec",
                 )
-                exec(py_code, defs, dict(defs))
+                exec(py_code, defs, defs)
             except Exception:
                 # NOTE(bozho2):
                 #   Output the exception's text as `#error BRYC:` lines
